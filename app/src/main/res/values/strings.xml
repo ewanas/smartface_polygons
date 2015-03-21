@@ -9,4 +9,8 @@
     <string name="lblDoIt">Generate\nproblem</string>
     <string name="lblTitle">Define\nproblem spec</string>
     <string name="title_activity_generate_problem">GenerateProblem</string>
+    <string name="title_activity_solve_problem">SolveProblem</string>
+    <string name="title_solved">Challenge accepted!</string>
+
+    <string name="hello_world">Hello world!</string>
 </resources>

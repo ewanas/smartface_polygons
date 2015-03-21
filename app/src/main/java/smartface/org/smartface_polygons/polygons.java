@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 
 
 public class polygons extends Activity {
@@ -48,6 +49,11 @@ public class polygons extends Activity {
 
   public void genProblem(View v) {
     Intent generate = new Intent(this, GenerateProblem.class);
+    EditText points = (EditText)(findViewById(R.id.txtPointsNumber));
+    EditText lines = (EditText)(findViewById(R.id.txtLinesNumber));
+
+    generate.putExtra("points", points.getText().toString());
+    generate.putExtra("lines", lines.getText().toString());
     startActivity(generate);
   }
 }

@@ -45,11 +45,9 @@
         android:layout_height="40dp"/>
 
     <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="genProblem"
-        android:text="@string/lblDoIt"
-        android:textSize="@dimen/label_sizes"
-        android:background="#99cc00"/>
+        android:id="@+id/btnGenerate"
+        style="@style/Buttons"
+        android:text="Generate\nProblem"
+        android:onClick="genProblem"/>
 
 </LinearLayout>

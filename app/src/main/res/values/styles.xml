@@ -34,4 +34,12 @@
         <item name="android:gravity">center</item>
     </style>
 
+    <style name="Buttons">
+
+        <item name="android:textSize">@dimen/label_sizes</item>
+        <item name="android:background">#99cc00</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
 </resources>

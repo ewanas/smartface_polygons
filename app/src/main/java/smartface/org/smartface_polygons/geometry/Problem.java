@@ -21,10 +21,77 @@ public class Problem {
   public Polygon poly;
   public Set<Point> points;
 
+  boolean solved = false;
+  public Set<Point> inside;
+  public Set<Point> outside;
+  public Set<Point> onPoly;
+
+  /**
+   * Generate a random problem instance
+   *
+   * @param sides number of sides of the polygon
+   * @param points number of points to classify
+   */
   public Problem(int sides, int points) {
     this.poly = randomPolygon(sides);
     this.points = randomPoints(points);
   }
+
+  /**
+   * A problem with the given polygon and points
+   *
+   * @param poly
+   * @param points
+   */
+  public Problem(Polygon poly, Set<Point> points) {
+    this.poly = poly;
+    this.points = points;
+  }
+
+  /**
+   * reference: wikipedia
+   *
+   * For a point, we'll consider the line segment going to 2.0,2.0
+   * if it intersects an even number of line segments, it's outside
+   * if it intersects an odd number of line segments, it's inside
+   *
+   * If the point is on the polygon, the behaviour is undefined.
+   */
+  private boolean insidePoly (Point p) {
+    LineSegment ray = new LineSegment(p, new Point(2.0, 2.0));
+
+    int intersections = 0;
+
+    for (LineSegment l : poly) {
+      if (ray.intersect(l, false)) intersections++;
+    }
+
+    return intersections % 2 != 0;
+  }
+
+  private boolean onPoly (Point p) {
+    for (LineSegment l : poly) {
+      if (l.pointOnLine(p)) return true;
+    }
+    return false;
+  }
+
+  public void solve() {
+    if (!solved) {
+      onPoly = new HashSet<Point> ();
+      inside = new HashSet<Point> ();
+      outside = new HashSet<Point> ();
+
+      for (Point p : points) {
+        if (onPoly(p)) onPoly.add(p);
+        else if (insidePoly(p)) inside.add(p);
+        else outside.add(p);
+      }
+      solved = true;
+    }
+  }
+
+
 
   /**
    * Something doesn't work right when I do it with 5 sides, but this tries to generate
