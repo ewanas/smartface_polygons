@@ -105,7 +105,7 @@ public class LineSegment {
 
     p = new Point(p.x * cos + p.y * sin, p.y * cos - p.x * sin);
 
-    return (Math.abs(p.y) <= Point.EPSILON) && (p.x > 0.0 && p.x < lenA);
+    return (Math.abs(p.y) <= Point.EPSILON) && (p.x > 0.0 && p.x - Point.EPSILON < lenA);
   }
 
   public boolean intersectsAny(Collection<LineSegment> segments) {

@@ -31,10 +31,19 @@ public class GenerateProblem extends Activity {
     Paint onPolyPoints;
     Paint outsidePoints;
     Paint insidePoints;
-    float point_radius = 20f;
+    float point_radius = 10f;
 
-    boolean showSolution = false;
+    boolean showSolution = false; // Whether or not to show the solution
+    int width, height;            // width and height of the current surface
+    boolean drawing = false;      // Whether or not the thread should continue
 
+    /**
+     * Set the styles for each type of entity:
+     *    Points outside should be red
+     *    Points inside green
+     *    Points on the line yellow(very rare on average)
+     *    Lines are black
+     */
     public ShowProblem (Context context, Problem p) {
       super(context);
       holder = getHolder();
@@ -59,9 +68,9 @@ public class GenerateProblem extends Activity {
       insidePoints.setColor(0xff00ff00);
     }
 
-    int width, height;
-
-    boolean drawing = false;
+    /**
+     * Continue drawing until the surface is destroyed
+     */
     public void run () {
       while (drawing) {
         Canvas c = holder.lockCanvas();
@@ -107,6 +116,9 @@ public class GenerateProblem extends Activity {
       c.save();
     }
 
+    /**
+     * Start the drawing thread
+     */
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
       drawingThread = new Thread (this);
@@ -115,6 +127,9 @@ public class GenerateProblem extends Activity {
       invalidate ();
     }
 
+    /**
+     * Set the new width and height for the drawing code to adapt to the scale
+     */
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
       this.width = width;
@@ -122,6 +137,10 @@ public class GenerateProblem extends Activity {
       invalidate();
     }
 
+    /**
+     * Set the continuation condition to false, so the drawing thread dies
+     * gracefully.
+     */
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
       boolean joined = false;

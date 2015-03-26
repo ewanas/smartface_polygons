@@ -11,7 +11,7 @@ public class Point {
   public static final boolean PEDANTIC = false;
 
   // Two points are considered equal if they are within EPSILON of each other
-  public static final double EPSILON = 0.00000000000001;
+  public static final double EPSILON = 0.0001;
 
   static final Point origin;
 

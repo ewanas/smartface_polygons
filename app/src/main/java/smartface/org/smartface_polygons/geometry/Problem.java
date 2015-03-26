@@ -91,8 +91,6 @@ public class Problem {
     }
   }
 
-
-
   /**
    * Something doesn't work right when I do it with 5 sides, but this tries to generate
    * a valid random polygon, bare with me :)
