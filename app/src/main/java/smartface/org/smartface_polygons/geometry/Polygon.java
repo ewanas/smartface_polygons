@@ -11,22 +11,25 @@ import java.util.Map.Entry;
  * or weird intersections.
  */
 public class Polygon implements Iterable<LineSegment> {
-  List<LineSegment> lines;
-
-  public Polygon(List<LineSegment> lines) {
-    this.lines = lines;
-  }
+  public final List<LineSegment> lines;
 
   /**
-   * Changed the design a bit, I made validation optional, as I was having trouble generating
-   * the polygon in a valid way.
+   * Only polygons which are valid can be constructed. It's up to the user
+   * to provide valid lines.
+   *
+   * @throws Geometry.InvalidParameters when there's a null list of lines, or the lines constitute
+   *          an invalid polygon.
    */
-  public Polygon(List<LineSegment> lines, boolean validate) {
-    this(lines);
+  public Polygon(List<LineSegment> lines) throws Geometry.InvalidParameters {
+    this.lines = lines;
 
-    if (validate && !validDegrees())
-      throw new IllegalArgumentException("Not all points have degree 2");
-    if (validate && !validIntersections()) throw new IllegalArgumentException("Lines intersect");
+    if (lines == null) {
+      throw new Geometry.InvalidParameters("Null list");
+    } else if (!validDegrees ()) {
+      throw new Geometry.InvalidParameters("Invalid degrees for vertices");
+    } else if (!validIntersections ()) {
+      throw new Geometry.InvalidParameters("Lines intersect");
+    }
   }
 
   /**
@@ -61,14 +64,19 @@ public class Polygon implements Iterable<LineSegment> {
 
   /**
    * Each line segment can't intersect any other line segment except at an endpoint, if at all.
+   *
+   * @throws Geometry.InvalidParameters if during the test, points outside the boundaries had to
+   * be created.
    */
-  private boolean validIntersections() {
+  private boolean validIntersections() throws Geometry.InvalidParameters {
     // Test for self intersections
     for (LineSegment i : lines) {
       for (LineSegment j : lines) {
         if (!i.equals(j)) {
-          if (i.intersect(j, true)) {
-            return false;
+          if (!i.shareEndpoint(j)) {
+            if (i.intersect(j)) {
+              return false;
+            }
           }
         }
       }
@@ -77,10 +85,9 @@ public class Polygon implements Iterable<LineSegment> {
     return true;
   }
 
-  public boolean isValid() {
-    return validIntersections() && validDegrees();
-  }
-
+  /**
+   * Allows the user to iterate over all line segments in this polygon
+   */
   public Iterator<LineSegment> iterator() {
     return lines.iterator();
   }

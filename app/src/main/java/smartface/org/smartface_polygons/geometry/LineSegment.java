@@ -3,36 +3,37 @@ package smartface.org.smartface_polygons.geometry;
 import java.util.Collection;
 
 /**
- * A line segment in space.
+ * A line segment in space. Immutable.
  */
 public class LineSegment {
-  public Point start, end;
+  public final Point start, end;
 
   /**
    * A line segment is created where the start is always the closer
    * point to the origin
    */
-  public LineSegment(Point start, Point end) {
-    // Makes other code easier with *some* convention like this
-    if (start == null || end == null) throw new IllegalArgumentException("Null end points");
+  public LineSegment(Point start, Point end) throws Geometry.InvalidParameters {
+    this.start = start;
+    this.end = end;
 
-    if (start.dist(Point.origin) > end.dist(Point.origin)) {
+    // Makes other code easier with *some* convention like this
+    if (start == null || end == null) {
+      throw new Geometry.InvalidParameters("Null end points");
+    } else if (start.dist(Point.origin) > end.dist(Point.origin)) {
       Point tmp = start;
       start = end;
       end = tmp;
     }
-
-    this.start = start;
-    this.end = end;
   }
 
   /**
    * Returns a translated line segment
    */
-  LineSegment translate(double deltaX, double deltaY) {
+  LineSegment translate(double deltaX, double deltaY) throws Geometry.InvalidParameters {
     return new LineSegment(
-            new Point(start.x + deltaX, start.y + deltaY),
-            new Point(end.x + deltaX, end.y + deltaY));
+        start.translate(deltaX, deltaY),
+        end.translate(deltaX, deltaY)
+        );
   }
 
   /**
@@ -46,22 +47,24 @@ public class LineSegment {
 
   /**
    * Returns whether or not two line segments share exactly one endpoint.
+   *
+   * If they share both endpoints, or no end points it returns false.
    */
-  private boolean shareEndpoint(LineSegment other) {
-    return ((start.equals(other.start) && !end.equals(other.end)) ||
-            (start.equals(other.end) && !end.equals(other.start)));
+  public boolean shareEndpoint(LineSegment other) {
+    return start.equals(other.start) ^ end.equals(other.end);
   }
 
   /**
-   * @param lenient whether or not to allow one end point in common
+   * If lines share an endpoint, it will return true
+   *
+   * @param other is another line segment
    * @return true if two line segments intersetct
    * reference: http://alienryderflex.com/intersect/
    * <p/>
    * Ignoring detecting lines which overlap. TODO
    */
-  public boolean intersect(LineSegment other, boolean lenient) {
-    if (equals(other)) return true;
-    else if (shareEndpoint(other)) return !lenient;
+  public boolean intersect(LineSegment other) throws Geometry.InvalidParameters {
+    if (equals(other) || shareEndpoint(other)) return true;
     else {
       // Translate all lines such that the first lines' start is at the origin.
       LineSegment A = translate(-start.x, -start.y);
@@ -73,10 +76,16 @@ public class LineSegment {
       double sin = A.end.y / lenA;
       double cos = A.end.x / lenA;
 
-      A.end = new Point(lenA, 0);
+      A = new LineSegment(A.start, new Point(lenA, 0)); // Just to help you visualize
 
-      B.start = new Point(B.start.x * cos + B.start.y * sin, B.start.y * cos - B.start.x * sin);
-      B.end = new Point(B.end.x * cos + B.end.y * sin, B.end.y * cos - B.end.x * sin);
+      B = new LineSegment(
+          new Point(
+            B.start.x * cos + B.start.y * sin,
+            B.start.y * cos - B.start.x * sin),
+          new Point(
+            B.end.x * cos + B.end.y * sin,
+            B.end.y * cos - B.end.x * sin)
+          );
 
       if ((B.start.y < 0 && B.end.y < 0) || (B.start.y >= 0 && B.end.y >= 0)) return false;
 
@@ -91,7 +100,7 @@ public class LineSegment {
    *
    * @param p a point to check if it belongs on the line segment or not
    */
-  public boolean pointOnLine(Point p) {
+  public boolean pointOnLine(Point p) throws Geometry.InvalidParameters {
     // Like LineSegment-LineSegment, I'll translate the
     // system, rotate it, and test if the point
     // is within the length of the transformed line segment
@@ -105,14 +114,22 @@ public class LineSegment {
 
     p = new Point(p.x * cos + p.y * sin, p.y * cos - p.x * sin);
 
-    return (Math.abs(p.y) <= Point.EPSILON) && (p.x > 0.0 && p.x - Point.EPSILON < lenA);
+    return (Math.abs(p.y) < Geometry.EPSILON) && (p.x > 0.0 && p.x - Geometry.EPSILON < lenA);
   }
 
-  public boolean intersectsAny(Collection<LineSegment> segments) {
+  /**
+   * Returns the intersections this line segment has with any of the line
+   * segments in the given collection
+   * 
+   * @param segments is any collection of line segments
+   */
+  public int intersectsAny(Collection<LineSegment> segments) throws Geometry.InvalidParameters {
+    int intersections = 0;
+
     for (LineSegment s : segments) {
-      if (intersect(s, true)) return true;
+      if (intersect(s)) intersections++;
     }
-    return false;
+    return intersections;
   }
 
   public String toString() {

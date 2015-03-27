@@ -13,7 +13,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.Button;
+import android.widget.Toast;
 
+import smartface.org.smartface_polygons.geometry.Geometry;
 import smartface.org.smartface_polygons.geometry.Problem;
 import smartface.org.smartface_polygons.geometry.LineSegment;
 import smartface.org.smartface_polygons.geometry.Point;
@@ -93,7 +95,12 @@ public class GenerateProblem extends Activity {
       }
 
       if (showSolution) {
-        problem.solve();
+        try {
+          problem.solve();
+        } catch(Geometry.InvalidParameters e) {
+          Toast.makeText(getContext(), "Unable to solve the problem", Toast.LENGTH_LONG);
+          // Report user error here to some crash analytics
+        }
 
         for (Point p : problem.outside){
           c.drawCircle((float) p.x * width, (float) p.y * height, point_radius, outsidePoints);
@@ -162,7 +169,12 @@ public class GenerateProblem extends Activity {
     super.onCreate(savedInstanceState);
     int points = Integer.parseInt ((String)(getIntent().getExtras().get("points")));
     int lines = Integer.parseInt ((String)(getIntent().getExtras().get("lines")));
-    p = new Problem (lines, points);
+    try {
+      p = new Problem(lines, points);
+    } catch (Geometry.InvalidParameters e) {
+      Toast.makeText(this, "Invalid problem generated", Toast.LENGTH_LONG);
+      finish();
+    }
 
     canvas = new ShowProblem (this, p);
 

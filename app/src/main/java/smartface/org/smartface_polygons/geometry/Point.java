@@ -1,25 +1,21 @@
 package smartface.org.smartface_polygons.geometry;
 
 /**
- * Stores information about a point in space.
+ * Stores information about a point in space. Immutable.
  */
 public class Point {
-  public static final double MIN_BOUNDARY = 0.0;
-  public static final double MAX_BOUNDARY = 1.0;
-
-  // Whether or not any point can be constructed outside the boundaries
-  public static final boolean PEDANTIC = false;
-
-  // Two points are considered equal if they are within EPSILON of each other
-  public static final double EPSILON = 0.0001;
-
   static final Point origin;
 
   static {
-    origin = new Point(0.0, 0.0);
+      origin = new Point();
   }
 
-  public double x, y;
+  public final double x, y;
+
+  private Point() {
+    this.x = 0.0;
+    this.y = 0.0;
+  }
 
   /**
    * Creates a new point.
@@ -27,14 +23,39 @@ public class Point {
    * @param x is the x coordinate of the point
    * @param y is the y coordinate of the point
    */
-  public Point(double x, double y) {
+  public Point(double x, double y) throws Geometry.InvalidParameters {
     this.x = x;
     this.y = y;
 
-    if (PEDANTIC && (x < MIN_BOUNDARY || x > MAX_BOUNDARY ||
-            y < MIN_BOUNDARY || y > MAX_BOUNDARY)) {
-      throw new IllegalArgumentException("Illegal point, not matching spec.");
+    if(!(Geometry.valid(x) && Geometry.valid(y))) {
+      throw new Geometry.InvalidParameters(
+          "Coordinates outside boundaries" + toString ()
+          );
     }
+  }
+
+  /**
+   * Translates a point in space.
+   *
+   * @param deltaX is the translation on the x axis.
+   * @param deltaY is the translation on the y axis.
+   */
+  public Point translate(double deltaX, double deltaY) throws Geometry.InvalidParameters {
+    return new Point(x + deltaX, y + deltaY);
+  }
+
+  /**
+   * Returns the distance between two points
+   */
+  public double dist(Point other) {
+    return Math.sqrt(Math.pow(x - other.x, 2) + Math.pow(y - other.y, 2));
+  }
+
+  /**
+   * Shows the coordinates of the point
+   */
+  public String toString() {
+    return "(" + x + ", " + y + ")";
   }
 
   /**
@@ -52,21 +73,7 @@ public class Point {
    * Two points are equal if their coordinates are within epsilon of each other
    */
   public boolean equals(Object other) {
-    return other instanceof Point && dist((Point) other) < EPSILON;
+    return other instanceof Point && dist((Point) other) < Geometry.EPSILON;
   }
 
-  public Point translate(double deltaX, double deltaY) {
-    return new Point(x + deltaX, y + deltaY);
-  }
-
-  /**
-   * Returns the distance between two points
-   */
-  public double dist(Point other) {
-    return Math.sqrt(Math.pow(x - other.x, 2) + Math.pow(y - other.y, 2));
-  }
-
-  public String toString() {
-    return "(" + x + ", " + y + ")";
-  }
 }
